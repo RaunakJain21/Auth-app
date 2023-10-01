@@ -3,6 +3,8 @@
 // install bcrypt
 const bcrypt = require('bcrypt');
 const user = require('../models/User');
+const jwt =require('jsonwebtoken');
+require('dotenv').confing();
 
 exports.signup = async(req,res)=>{
     try{
@@ -37,6 +39,55 @@ exports.signup = async(req,res)=>{
 
     }
     catch{
-
+        res.status(404).json(
+            {
+                success:false,
+                message:"error "
+            }
+        )
     }
 } 
+exports.login = async(req,res)=>{
+    try{
+        const {email,password}=require(res.body);
+        if(!email || !password)
+        {
+            res.status(401).json({
+
+                "success":false
+                ,"message":"Please fill all the fields"  
+            })
+        }
+
+        const existingUser = await user.findOne({email});
+
+
+        if(!existingUser)
+        {
+            res.status(401).json({
+                "success":false
+                ,"message":"User doesn't exist please enter valid email or username"  
+                  })
+
+        }
+        const payload ={
+            email:user.email,
+            id:user.id,
+            role:user.role,
+        };
+        if(await bcrypt.compare(password,user.password))
+        {
+            // password match
+            let token =jwt.sign(payload,process.env.JWT_SECRET,{
+                expiresIn:"2h",
+            });
+            user=user.toObject();
+            user.password=undefined;
+            user. 
+        }
+
+    }
+    catch{
+
+    }
+}
